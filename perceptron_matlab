@@ -1,0 +1,66 @@
+function perceptron
+% binary inputs and binary output!
+
+nandTutorial = input('Do you want to see what a NAND gate would look like?  Y=yes, N=no...','s');
+if strcmp(nandTutorial,'y')==1    
+    disp('Enter two inputs and give them both a weight of -2.')
+    disp('Enter the threshold at -3 (i.e., a bias of 3).')
+    disp('Have at least one of the inputs not fire (00 or 10 or 01). The perceptron will fire.')
+    disp('If both inputs fire (11), then the perceptron will not fire.')
+end
+disp('Okay, have fun!')
+
+keepItGoing = 1; keepInputs = 1; keepThreshold = 1; keepWeights = 1; keepFiring = 1;
+tc = 1;
+while keepItGoing == 1            
+    if keepInputs ~=1 || tc==1        
+        howManyInputs = input('How many inputs are going into this neuron?...');
+        while isnumeric(howManyInputs)~=1
+            howManyInputs = input('Nice try, homeskillet, I need a number. How many inputs?...');
+        end    
+    end
+    
+    if keepThreshold ~=1 || tc==1        
+        threshold = input('What is the output firing threshold?  Use a number...');
+        bias = -1 * threshold;
+    end
+    
+    if keepWeights ~=1 || tc==1         
+        for z = 1:howManyInputs
+            neuron(z).weight = input(strcat('What is the weight for neuron #',num2str(z),'? Use a number...'));
+        end
+    end
+    
+    if keepFiring ~=1 || tc==1
+        for y = 1:howManyInputs
+            neuron(y).onoff = input(strcat('Is neuron #',num2str(y),' firing (1) or not (0)?...'));
+            neuron(y).output = neuron(y).onoff * neuron(y).weight;
+        end
+    end
+
+%     EPSP = 0;
+%     for x = 1:howManyInputs
+%         EPSP = EPSP + neuron(x).output;
+%     end
+    
+%     if EPSP >= threshold
+    if ([neuron.weight] * [neuron.onoff]') + bias <= 0
+        disp('Perceptron does not fire.')    
+    else
+        disp('Perceptron fires!!!')
+    end
+
+    keepItGoing = input('Want to go again?  Enter 1 for yes, 0 for no...');
+    if keepItGoing == 0
+        return
+    else
+        keepInputs = input('Keep the same number of inputs?  Enter 1 to keep the same, 0 to change...');
+        keepThreshold = input('Keep the threshold the same?  Enter 1 to keep the same, 0 to change...');
+        keepWeights = input('Keep the weights of the inputs the same?  Enter 1 to keep the same, 0 to change...');
+        keepFiring = input('Keep the same firing pattern for the input neurons?  Enter 1 to keep the same, 0 to change...');
+        tc = tc + 1;
+    end
+end
+
+
+end
