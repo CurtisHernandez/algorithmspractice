@@ -1,0 +1,54 @@
+function sigmoid
+
+keepItGoing = 1; keepInputs = 1; keepBias = 1; keepWeights = 1; keepFiring = 1;
+tc = 1;
+while keepItGoing == 1            
+    if keepInputs ~=1 || tc==1        
+        howManyInputs = input('How many inputs are going into this neuron?...');
+        while isnumeric(howManyInputs)~=1
+            howManyInputs = input('Nice try, homeskillet, I need a number. How many inputs?...');
+        end    
+    end
+    
+    if keepBias ~=1 || tc==1        
+        threshold = input('What is the output firing bias?  Use a number...');
+        bias = -1 * threshold;
+    end
+    
+    if keepWeights ~=1 || tc==1         
+        for z = 1:howManyInputs
+            neuron(z).weight = input(strcat('What is the weight for neuron #',num2str(z),'? Use a number...'));
+        end
+    end
+    
+    if keepFiring ~=1 || tc==1
+        for y = 1:howManyInputs
+            neuron(y).rate = input(strcat('To what degree is neuron #',num2str(y),' firing?  Between 0:1...'));
+            neuron(y).output = neuron(y).rate * neuron(y).weight;
+        end
+    end
+
+%     EPSP = 0;
+%     for x = 1:howManyInputs
+%         EPSP = EPSP + neuron(x).output;
+%     end
+    
+%     if EPSP >= bias
+    EPSP = [neuron.weight] * [neuron.rate]';
+    sigmoidOutput = 1/(1+(exp((-1*EPSP)-bias)));
+    disp(strcat('Sigmoid neuron firing output:',num2str(sigmoidOutput)))    
+
+    keepItGoing = input('Want to go again?  Enter 1 for yes, 0 for no...');
+    if keepItGoing == 0
+        return
+    else
+        keepInputs = input('Keep the same number of inputs?  Enter 1 to keep the same, 0 to change...');
+        keepBias = input('Keep the bias the same?  Enter 1 to keep the same, 0 to change...');
+        keepWeights = input('Keep the weights of the inputs the same?  Enter 1 to keep the same, 0 to change...');
+        keepFiring = input('Keep the same firing pattern for the input neurons?  Enter 1 to keep the same, 0 to change...');
+        tc = tc + 1;
+    end
+end
+
+
+end
