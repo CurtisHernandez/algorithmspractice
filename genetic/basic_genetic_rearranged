@@ -1,0 +1,140 @@
+#### Genetic algorithm tutorial
+#### The tutorial was about guessing a password.
+#### Most fundamental pieces yoinked from the following tutorial:
+#### https://blog.sicara.com/getting-started-genetic-algorithms-python-tutorial-81ffa1dd72f9
+
+#### LIBRARIES
+import random
+import pandas
+
+#### FUNCTIONS
+# FIRST: we need to figure out how to test the fitness of an individual.
+def fitness (password, test_word):
+	if (len(test_word) != len(password)):
+		print("The test word is not the same length as the password, dingus")
+		return
+	else:
+		score = 0
+		i = 0
+		while (i < len(password)):
+			if (password[i] == test_word[i]):
+				score+=1
+			i+=1
+		return score * 100 / len(password)
+
+# NEXT: we need to make a random population at generation 0.
+# We develop a technique for making random words, given some length.
+def generateAWord (length):
+	i = 0
+	result = ""
+	while i < length:
+		letter = chr(97 + int(26 * random.random()))
+		result += letter
+		i +=1
+	return result
+
+# THEN: we make the most eligible bachelors and bachelorettes breed, plus
+# a few lucky Steve Buscemis.
+# To sort by the Chadness and Stacyness...
+def fitnessSortedPopulation(population, password):
+    fitnessScores = []
+    for i in population:
+        fitnessScores.append(fitness(password,i))
+    populationPerf = pandas.DataFrame(data=population, columns=['individual'])
+    populationPerf['fitness'] = fitnessScores
+    populationPerf = populationPerf.sort_values(by=['fitness'], ascending=False)
+    sortedpop = list(populationPerf['individual'])
+    return sortedpop
+
+# To select those who are going to be parents...
+def selectFromPopulation(populationSorted, best_sample, lucky_few):
+    parents = []
+    for i in range(best_sample):
+        parents.append(populationSorted[i])
+    for i in range(best_sample):
+        populationSorted.remove(populationSorted[0])
+    for i in range(lucky_few):
+        buscemi = random.choice(populationSorted)
+        parents.append(buscemi)
+        populationSorted.remove(buscemi)
+    random.shuffle(parents) #why?  might we not assume that there would be some mate value matching?
+    return parents
+
+# NEXT UP: everyone has sex.  or at least babies.
+def createChild(individual1,individual2):
+    child = ""
+    for i in range(len(individual1)):
+        if (int(100*random.random()) < 50):
+            child += individual1[i]
+        else:
+            child += individual2[i]
+    return child
+
+def createChildren(parents,gensize):
+    nextgen = []
+    while len(nextgen)<gensize:
+        for i in range(int(len(parents)/2)):
+            nextgen.append(createChild(parents[i],parents[len(parents)-i-1]))
+    return nextgen[0:gensize] # there must be a more graceful way to do this but w/e
+
+# Sometimes genes mutate
+def mutateWord(word):
+    index_modification = int(random.random() * len(word))
+    if (index_modification == 0):
+	    word = chr(97 + int(26 * random.random())) + word[1:]
+    else:
+        word = word[:index_modification] + chr(97 + int(26 * random.random())) + word[index_modification+1:]
+    return word
+	
+def mutatePopulation(population, chance_of_mutation):
+    for i in range(len(population)):
+        if random.random() * 100 < chance_of_mutation:
+            population[i] = mutateWord(population[i])
+    return population
+
+#### THE MEGA-FUNCTION
+# some values you can initialize on if you want:
+# password = 'beepboop'
+# gensize = 100
+# percentParents = .76
+# proportionBest = .8
+# mutProb = 5.0
+# numgen = 100
+def geneticAlgorithm(password,gensize,percentParents,proportionBest,mutProb,numgen):
+    # fixing up the arguments that are messed up
+    while round(gensize * percentParents) % 2 != 0 or percentParents > 1:
+        if gensize * percentParents % 2 != 0:
+            print('You need an even number of parents! We are a strictly monogamous society. Try again.')
+        if percentParents > 1:
+            print("Silly rabbit, that wasn't a decimal. Try again.")
+        print('What is the size of each generation?')
+        gensize = int(input())
+        print('What percentage of your population is goign to be parents?  Use decimals.')
+        percentParents
+    while mutProb/100 > 1:
+        print("I SAID put a DECIMAL")
+        mutProb = float(input()) * 100
+
+    howManyParents = round(gensize * percentParents)
+    howManyChads = round(howManyParents * proportionBest)
+
+    # make the first generation!
+    gen = []
+    for i in range(gensize):
+        gen.append(generateAWord(len(password)))
+
+    for begats in range(numgen):
+        # sort them by fitness!
+        sortedgen = fitnessSortedPopulation(gen,password)
+        # pick the lucky ones who get to breed!
+        parents = selectFromPopulation(sortedgen,howManyChads,howManyParents-howManyChads)
+        # make some babies!
+        gen = createChildren(parents,gensize)
+        # mutate those babies!
+        gen = mutatePopulation(gen,mutProb)
+    
+    #### Evaluating this particular timeline
+    howManyRight = list(x==password for x in gen)
+    performance = sum(howManyRight)/len(howManyRight)
+    print('In this particular universe you created, the parameters had a performance value of ' + str(int(performance*100)) + '%.')
+    return performance
