@@ -44,7 +44,7 @@ X_train = scaler.transform(X_train)
 X_test = scaler.transform(X_test)
 
 # Import `Sequential` from `keras.models`
-from keras.models import Sequential
+##########from keras.models import Sequential
 
 # Import `Dense` from `keras.layers`
 from keras.layers import Dense
@@ -72,18 +72,6 @@ model.get_config()
 
 # List all weight tensors 
 model.get_weights()
-
-# Import `StandardScaler` from `sklearn.preprocessing`
-from sklearn.preprocessing import StandardScaler
-
-# Define the scaler 
-scaler = StandardScaler().fit(X_train)
-
-# Scale the train set
-X_train = scaler.transform(X_train)
-
-# Scale the test set
-X_test = scaler.transform(X_test)
 
 model.compile(loss='binary_crossentropy',
               optimizer='adam',
